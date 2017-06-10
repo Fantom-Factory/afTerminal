@@ -1,28 +1,36 @@
 using fandoc
 using gfx::Color
 
+// TODO create a tput command that takes escape aliases - see http://linuxcommand.org/lc3_adv_tput.php
 ** Generates a sequence of ANSI escape codes.
 ** 
-** TODO create a tput command that takes escape aliases - see http://linuxcommand.org/lc3_adv_tput.php
+** Note that generated SGR command sequences are optimised where possible.
 class AnsiBuf {
 	
-	public static const Int ESC	:= 0x1B
+	** The 'ESC' char, '0x1B'.
+	static const Int ESC	:= 0x1B
 	
 	private StrBuf	buf		:= StrBuf()
 	private Bool	inSgr	:= false
 	
+	** Creates an 'AnsiBuf' instance , optionally with the given string / ANSI sequence.
 	new make(Str? str := null) {
 		if (str != null)
 			buf.add(str)
 	}
 	
-	** Writes the *Control Sequence Initiator*, the chars 'ESC['.
+	** Writes the *Control Sequence Initiator*.
+	** 
+	**   ansi-sequence: ESC[
 	This csi() {
 		endSgr.addChar(ESC).addChar('[')
 		return this
 	}
 	
+	** Moves the cursor up a number of rows.
 	** Passing in '0' or 'null' does nothing. 
+	** 
+	**   ansi-sequence: ESC[${rows}A
 	This curUp(Int? rows := 1) {
 		if (rows == null || rows == 0)	return this
 		if (rows < 0 || rows > 0xFF)
@@ -30,7 +38,10 @@ class AnsiBuf {
 		return csi.add(rows.toStr).addChar('A')
 	}
 
+	** Moves the cursor up a number of rows.
 	** Passing in '0' or 'null' does nothing. 
+	** 
+	**   ansi-sequence: ESC[${rows}B
 	This curDown(Int? rows := 1) {
 		if (rows == null || rows == 0)	return this
 		if (rows < 0 || rows > 0xFF)
@@ -38,7 +49,10 @@ class AnsiBuf {
 		return csi.add(rows.toStr).addChar('B')
 	}
 
+	** Moves the cursor left a number of rows.
 	** Passing in '0' or 'null' does nothing. 
+	** 
+	**   ansi-sequence: ESC[${cols}D
 	This curLeft(Int? cols := 1) {
 		if (cols == null || cols == 0)	return this
 		if (cols < 0 || cols > 0xFF)
@@ -46,7 +60,10 @@ class AnsiBuf {
 		return csi.add(cols.toStr).addChar('D')
 	}
 
+	** Moves the cursor right a number of rows.
 	** Passing in '0' or 'null' does nothing. 
+	** 
+	**   ansi-sequence: ESC[${cols}C
 	This curRight(Int? cols := 1) {
 		if (cols == null || cols == 0)	return this
 		if (cols < 0 || cols > 0xFF)
@@ -54,8 +71,11 @@ class AnsiBuf {
 		return csi.add(cols.toStr).addChar('C')
 	}
 
+	** Moves the cursor to an absolute column position.
 	** Note that ANSI standards state that 'column' is 1 based, so 'curHorizonal(1)' returns the cursor to the start of the line.
 	** Passing in '0' or 'null' does nothing. 
+	** 
+	**   ansi-sequence: ESC[${col}G
 	This curHorizonal(Int? column := 1) {
 		if (column == null || column == 0)	return this
 		if (column < 1 || column > 0xFF)
@@ -65,20 +85,21 @@ class AnsiBuf {
 
 	** Moves the cursor to the start of the current line.
 	** 
-	** Note this is a Fish extension - not an ANSI standard.
-	** 
 	**   ansi-sequence: ESC[v
+	** 
+	** Note this is an Alien-Factory extension - not an ANSI standard.
 	This curHome() {
+		// TODO Linux Terminal - this is not an ANSI standard (curHome) 
 		csi.addChar('v')
 	}
 
 	** Moves the cursor to the end of the current line.
 	** 
-	** Note this is a Fish extension - not an ANSI standard.
-	** 
 	**   ansi-sequence: ESC[w
+	** 
+	** Note this is an Alien-Factory extension - not an ANSI standard.
 	This curEnd() {
-		// TODO Linux Terminal - replace curEnd() with something portable (so we can use a non-Fantom terminal)
+		// TODO Linux Terminal - this is not an ANSI standard (curEnd) 
 		csi.addChar('w')
 	}
 
@@ -106,38 +127,72 @@ class AnsiBuf {
 	
 	** Clears the current line.
 	** The cursor position is unaffected. 
+	** 
+	**   ansi-sequence: ESC[2K
 	This clearLine() {
 		csi.addChar('2').addChar('K')
 	}
 		
+	** Clears the current line from the cursor to the start.
+	** The cursor position is unaffected. 
+	** 
+	**   ansi-sequence: ESC[1K
 	This clearLineToStart() {
 		csi.addChar('1').addChar('K')
 	}
 		
+	** Clears the current line from the cursor to the end.
+	** The cursor position is unaffected. 
+	** 
+	**   ansi-sequence: ESC[0K
 	This clearLineToEnd() {
 		csi.addChar('0').addChar('K')
 	}
 		
+	** Resets text to:
+	**  - default foreground colour
+	**  - default background colour
+	**  - non-bold
+	**  - non-italics
+	**  - no underline
+	**  
+	**   ansi-sequence: ESC[m
 	This reset() {
 		endSgr.addChar(ESC).addChar('[').addChar('m')
 		return this
 	}
 
+	** Sets the foreground colour to the given RGB integer.
+	** If 'null' is passed, this method does nothing.
+	** 
+	**  - bits 16-23 red
+	**  - bits 8-15 green
+	**  - bits 0-7 blue
+	**  
+	** For example orange would be '0xFF_A5_00'.
+	** 
+	**   ansi-sequence: ESC[38;2;${r};${g};${b}m
 	This fgRgb(Int? rgb) {
-		if (rgb == null)	return this
+		if (rgb == null) return this
 		if (rgb < 0 || rgb > 0xFF_FF_FF)
 			throw ArgErr("Invalid colour index: 0..0xFFFFFF != $rgb")
-		c := Color(rgb)
-		startSgr.addChar('3').addChar('8').addChar(';').addChar('2').addChar(';').add(c.r.toStr).addChar(';').add(c.g.toStr).addChar(';').add(c.b.toStr)
-		return this
+		return fg(Color(rgb))
 	}
 
+	** Sets the foreground colour to the given Color. Any alpha value is ignored.
+	** If 'null' is passed, this method does nothing.
+	**  
+	**   ansi-sequence: ESC[38;2;${r};${g};${b}m
 	This fg(Color? col) {
-		if (col == null)	return this
+		if (col == null) return this
 		startSgr.addChar('3').addChar('8').addChar(';').addChar('2').addChar(';').add(col.r.toStr).addChar(';').add(col.g.toStr).addChar(';').add(col.b.toStr)
 		return this
 	}
 
+	** Sets the foreground colour to the given palette colour. (0..255)
+	** If 'null' is passed, this method does nothing.
+	**  
+	**   ansi-sequence: ESC[38;5;${i}m
 	This fgIdx(Int? i) {
 		if (i == null)	return this
 		if (i < 0 || i > 255)
@@ -146,26 +201,45 @@ class AnsiBuf {
 		return this
 	}
 
+	** Resets the foreground colour to default.
+	**  
+	**   ansi-sequence: ESC[39m
 	This fgReset() {
 		startSgr.addChar('3').addChar('9')
 		return this
 	}
 
+	** Sets the background colour to the given RGB integer.
+	** If 'null' is passed, this method does nothing.
+	** 
+	**  - bits 16-23 red
+	**  - bits 8-15 green
+	**  - bits 0-7 blue
+	**  
+	** For example orange would be '0xFF_A5_00'.
+	** 
+	**   ansi-sequence: ESC[48;2;${r};${g};${b}m
 	This bgRgb(Int? rgb) {
 		if (rgb == null)	return this
 		if (rgb < 0 || rgb > 0xFF_FF_FF)
 			throw ArgErr("Invalid colour index: 0..0xFFFFFF != $rgb")
-		c := Color(rgb)
-		startSgr.addChar('4').addChar('8').addChar(';').addChar('2').addChar(';').add(c.r.toStr).addChar(';').add(c.g.toStr).addChar(';').add(c.b.toStr)
-		return this
+		return bg(Color(rgb))
 	}
 
+	** Sets the background colour to the given Color. Any alpha value is ignored.
+	** If 'null' is passed, this method does nothing.
+	**  
+	**   ansi-sequence: ESC[48;2;${r};${g};${b}m
 	This bg(Color? col) {
 		if (col == null)	return this
 		startSgr.addChar('4').addChar('8').addChar(';').addChar('2').addChar(';').add(col.r.toStr).addChar(';').add(col.g.toStr).addChar(';').add(col.b.toStr)
 		return this
 	}
 
+	** Sets the background colour to the given palette colour (0..255).
+	** If 'null' is passed, this method does nothing.
+	**  
+	**   ansi-sequence: ESC[48;5;${i}m
 	This bgIdx(Int? i) {
 		if (i == null)	return this
 		if (i < 0 || i > 255)
@@ -174,11 +248,17 @@ class AnsiBuf {
 		return this
 	}
 
+	** Resets the foreground colour to default.
+	**  
+	**   ansi-sequence: ESC[49m
 	This bgReset() {
 		startSgr.addChar('4').addChar('9')
 		return this
 	}
 
+	** Turns bold on or off.
+	**  
+	**   ansi-sequence: ESC[1m or ESC[21m
 	This bold(Bool onOff := true) {
 		if (onOff)
 			startSgr.addChar('1')
@@ -187,6 +267,9 @@ class AnsiBuf {
 		return this
 	}
 
+	** Turns italics on or off.
+	**  
+	**   ansi-sequence: ESC[3m or ESC[23m
 	This italic(Bool onOff := true) {
 		if (onOff)
 			startSgr.addChar('3')
@@ -195,6 +278,9 @@ class AnsiBuf {
 		return this
 	}
 
+	** Turns underline on or off.
+	**  
+	**   ansi-sequence: ESC[4m or ESC[24m
 	This underline(Bool onOff := true) {
 		if (onOff)
 			startSgr.addChar('4')
@@ -203,6 +289,11 @@ class AnsiBuf {
 		return this
 	}
 
+	** Turns crossed out on or off.
+	**  
+	**   ansi-sequence: ESC[4m or ESC[24m
+	** 
+	** Note this is represented by a squiggly underline in the ANSI Terminal.
 	This crossedOut(Bool onOff := true) {
 		if (onOff)
 			startSgr.addChar('9')
@@ -211,6 +302,11 @@ class AnsiBuf {
 		return this
 	}
 
+	** Turns concealed text on or off.
+	**  
+	**   ansi-sequence: ESC[8m or ESC[28m
+	** 
+	** *Not implemented.*
 	This conceal(Bool onOff := true) {
 		if (onOff)
 			startSgr.addChar('8')
@@ -219,7 +315,7 @@ class AnsiBuf {
 		return this
 	}
 
-	** Optimized implementation for 'print(ch.toChar)'.
+	** Optimised implementation for 'print(ch.toChar)'.
 	This printChar(Int ch) {
 		endSgr.addChar(ch)
 		return this
@@ -249,13 +345,13 @@ class AnsiBuf {
 		return this
 	}
 
-	** Convenience for "printChar('\n')".
+	** Convenience for printChar('\n').
 	This newLine() {
 		endSgr.addChar('\n')
 		return this
 	}
 	
-	** Convenience for "printChar('\b')".
+	** Convenience for printChar('\b').
 	This backspace() {
 		endSgr.addChar('\b')
 		return this		
