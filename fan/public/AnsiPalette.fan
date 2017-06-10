@@ -1,5 +1,4 @@
-using gfx
-using afIoc
+using gfx::Color
 
 ** 256 ANSI colour palette.
 const class AnsiPalette {
@@ -115,7 +114,6 @@ const class AnsiPalette {
 	**  - XP for Windows, 
 	**  - Mac for sad people, 
 	**  - XTerm for everyone else.
-	@Inject
 	static new make() {
 		if (Env.cur.os == "win32")
 			return AnsiPalette(paletteXp)
