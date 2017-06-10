@@ -7,7 +7,7 @@ internal class TestAnsiModel : Test {
 	
 	override Void setup() {
 		pal		= AnsiPalette.xp
-		model	= AnsiModel(RichTextStyle())
+		model	= AnsiModel(AnsiTerminal().defStyle)
 	}
 	
 	Void testClearToEnd() {

@@ -29,7 +29,7 @@ class AnsiTerminal {
 	**     palette  = AnsiPalette.putty
 	** }
 	** <pre
-	new make(|This| f) {
+	new make(|This|? f := null) {
 		defFont		:= Font { name = "monospace"; size = 10 }
 		defFg		:= Color(0xCFCFCF)
 		defBg		:= Color(0x202020)
@@ -40,7 +40,7 @@ class AnsiTerminal {
 		this.ansiPalette	= AnsiPalette()
 
 		// let the it-block override the styles
-		f(this)
+		f?.call(this)
 		
 		this._ansiModel 	= AnsiModel(this.defStyle)
 
