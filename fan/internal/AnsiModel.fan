@@ -13,7 +13,7 @@ internal class AnsiModel {
 	private Int?			caretYMin
 	private TextMods		textMods	:= TextMods()
 	private Int[]?			caretCache
-	private Log				log			:= Log.get("afFish.AnsiModel")
+	private Log				log			:= AnsiModel#.pod.log
 		AnsiRichTextModel	richTextModel
 
 	new make(RichTextStyle defStyle) {
