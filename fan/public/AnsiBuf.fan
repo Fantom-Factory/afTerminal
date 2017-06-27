@@ -26,7 +26,9 @@ class AnsiBuf {
 		endSgr.addChar(ESC).addChar('[')
 		return this
 	}
-	
+			
+	// ---- Cursor methods ----------------------------------------------------
+
 	** Moves the cursor up a number of rows.
 	** Passing in '0' or 'null' does nothing. 
 	** 
@@ -118,6 +120,8 @@ class AnsiBuf {
 		csi.addChar('u')		
 	}
 
+	// ---- Clear methods -----------------------------------------------------
+
 	** Clears the screen.
 	** 
 	**   ansi-sequence: ESC[2J
@@ -148,7 +152,9 @@ class AnsiBuf {
 	This clearLineToEnd() {
 		csi.addChar('0').addChar('K')
 	}
-		
+
+	// ---- Colour methods ----------------------------------------------------
+
 	** Resets text to:
 	**  - default foreground colour
 	**  - default background colour
