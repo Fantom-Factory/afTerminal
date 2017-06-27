@@ -52,9 +52,7 @@ internal class AnsiModel {
 	}
 	
 	Str text() {
-		buf := StrBuf()
-		lines.each { buf.add(it.textStr).addChar('\n') }
-		return buf.toStr
+		lines.join("\n") { it.textStr }
 	}
 
 	Void flush() {

@@ -9,8 +9,8 @@ class AnsiTester {
 	RichTextStyle defStyle	:= RichTextStyle()
 	RichTextStyle errStyle	:= RichTextStyle()
 	
-	new make(|This| in) {
-		in(this)
+	new make(|This|? in := null) {
+		in?.call(this)
 		ansiModel	= AnsiModel(defStyle)
 		ansiPrinter	= AnsiPrinter {
 			it.palette	= AnsiPalette()
@@ -20,11 +20,11 @@ class AnsiTester {
 		}
 	}
 	
-	Void print(Str str) {
+	Void print(Obj str) {
 		ansiPrinter.print(str)
 	}
 
-	Void printErr(Str str) {
+	Void printErr(Obj str) {
 		ansiPrinter.printErr(str)
 	}
 	
