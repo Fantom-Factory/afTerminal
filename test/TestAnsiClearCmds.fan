@@ -27,7 +27,7 @@ internal class TestAnsiClearCmds : Test {
 		verifyText("#####\n###==")
 
 		print { it.curLeft(2).clearLineToStart } 
-		verifyText("#####\n==")
+		verifyText("#####\n   ==")
 	}
 	
 	Void testClearLineToEnd() {

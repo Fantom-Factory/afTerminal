@@ -58,8 +58,13 @@ internal class AnsiModel {
 	Void flush() {
 		log.debug("flush()")
 		textMods.fire(richTextModel)
-		richText.caretOffset = currentLine.offset + caretX			
-		richText.showLine(caretY)
+		
+		// rich text is null when using AnsiTester
+		if (richText != null) {
+			richText.caretOffset = currentLine.offset + caretX
+			richText.showLine(caretY)
+		}
+
 		// TODO richText.showColumn(caretX) or richText.scrollTo(x, y)
 		// see http://help.eclipse.org/kepler/topic/org.eclipse.platform.doc.isv/reference/api/org/eclipse/swt/custom/StyledText.html#setHorizontalIndex(int)
 	}
@@ -214,7 +219,7 @@ internal class AnsiModel {
 			str := "".padl(caretX, fillChar)
 			textMods.delStr(currentLine.offset, currentLine.textStr)
 			textMods.addStr(currentLine.offset, str)
-			currentLine.replaceRange(0..caretX, str)
+			currentLine.replaceRange(0..<caretX, str)
 		}
 	}
 
@@ -224,7 +229,7 @@ internal class AnsiModel {
 			str := "".padl(caretX, fillChar)
 			textMods.delStr(currentLine.offset, currentLine[0..<caretX])
 			textMods.addStr(currentLine.offset, str)
-			currentLine.replaceRange(0..caretX, str)
+			currentLine.replaceRange(0..<caretX, str)
 		}
 	}
 	
