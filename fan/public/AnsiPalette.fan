@@ -1,6 +1,13 @@
 using gfx::Color
 
-** 256 ANSI colour palette.
+** 256 ANSI colour palette. Palettes are provided for:
+**  - VGA
+**  - Windows XP
+**  - Mac OS X
+**  - PuTTY
+**  - Xterm
+** 
+** All colours taken from [Wikipedia]`https://en.wikipedia.org/wiki/ANSI_escape_code#Colors`.
 const class AnsiPalette {
 		
 	private static Color[] paletteVga() {
