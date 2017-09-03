@@ -12,7 +12,7 @@ Features:
 
 'AnsiTerminal' wraps a 'RichText' widget and provides methods to print ANSI escape sequences.
 
-'AnsiBuf' provides convenient methods for generating ANSI escape sequences.
+The 'AnsiBuf' class provides convenient methods for generating ANSI escape sequences.
 
 
 

@@ -21,6 +21,6 @@ class Build : BuildPod {
 		]
 
 		srcDirs = [`fan/`, `fan/advanced/`, `fan/internal/`, `fan/public/`, `test/`]
-		resDirs = [,]
+		resDirs = [`doc/`]
 	}
 }
