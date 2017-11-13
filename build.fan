@@ -5,7 +5,7 @@ class Build : BuildPod {
 	new make() {
 		podName = "afTerminal"
 		summary = "ANSI Terminal FWT Widget"
-		version = Version("0.0.2")
+		version = Version("0.9.0")
 
 		meta = [
 			"pod.dis"		: "ANSI Terminal",
