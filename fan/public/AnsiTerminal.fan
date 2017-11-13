@@ -47,14 +47,14 @@ class AnsiTerminal {
 		richText = RichText() {
 			it.border	= false
 			it.editable	= false	// luckily we still get all the events!
-			it.fg		= this.defStyle.fg
-			it.bg		= this.defStyle.bg
 			it.font		= this.defStyle.font
 			it.model 	= _ansiModel.richTextModel
+			it.fg		= this.defStyle.fg
+			it.bg		= this.defStyle.bg
 		}
-		
+
 		_ansiModel.richText = this.richText
-		
+
 		_ansiPrinter = AnsiPrinter {
 			it.palette	= this.ansiPalette
 			it.model	= _ansiModel
@@ -62,7 +62,7 @@ class AnsiTerminal {
 			it.errStyle	= this.errStyle
 		}
 	}
-	
+
 	
 	
 	// ---- Widget Methods ------------------------------------------------------------------------	

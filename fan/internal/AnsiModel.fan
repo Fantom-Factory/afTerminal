@@ -435,9 +435,16 @@ internal class Line {
 	}
 
 	Void addChar(Int pos, Int ch) {
-		if (pos == text.size)
+		if (pos == text.size) {
 			text.addChar(ch)
-		else {
+			return
+		}
+//		if (pos > text.size) {
+//			throw Err("Can not insert char '$ch.toChar' @ pos $pos - size is $text.size : $text")
+//		}
+		
+		try {
+
 			text.insert(pos, ch.toChar)
 			
 			i := 0
@@ -447,7 +454,9 @@ internal class Line {
 					styling[i] = offset + 1
 				i+=2
 			}
-		}
+			
+		} catch (Err e)
+			throw Err("Can not insert char '$ch.toChar' @ pos $pos - size is $text.size : $text", e)
 	}
 
 	Int? delChar(Int pos) {
